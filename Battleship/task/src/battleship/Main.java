@@ -7,6 +7,8 @@ import static java.lang.Math.abs;
 
 public class Main {
 
+    static Scanner scanner = new Scanner(System.in);
+
     static final int WAR_WIDTH = 11;
     static final int WAR_LENGTH = 11;
     static final int INITIATE_CHARACTER = 64;
@@ -33,7 +35,16 @@ public class Main {
 
     public static void main(String[] args) {
         setupGameBoard();
+        setupGame();
         startGame();
+    }
+
+    private static void startGame() {
+        System.out.println("The game starts!");
+        printGameBoard();
+        System.out.println("Take a shot!");
+        receiveCoordinates(false);
+        printGameBoard();
     }
 
     private static void setupGameBoard() {
@@ -55,47 +66,57 @@ public class Main {
         }
     }
 
-    private static void startGame() {
+    private static void setupGame() {
         System.out.println("Enter the coordinates of the Aircraft Carrier (5 cells):");
         airCraftCarrier = true;
-        receiveCoordinates();
+        receiveCoordinates(true);
         printGameBoard();
 
         System.out.println("Enter the coordinates of the Battleship (4 cells):");
         battleShip = true;
-        receiveCoordinates();
+        receiveCoordinates(true);
         printGameBoard();
 
         System.out.println("Enter the coordinates of the Submarine (3 cells):");
         submarine = true;
-        receiveCoordinates();
+        receiveCoordinates(true);
         printGameBoard();
 
         System.out.println("Enter the coordinates of the Cruiser (3 cells):");
         cruiser = true;
-        receiveCoordinates();
+        receiveCoordinates(true);
         printGameBoard();
 
         System.out.println("Enter the coordinates of the Destroyer (2 cells)");
         destroyer = true;
-        receiveCoordinates();
+        receiveCoordinates(true);
         printGameBoard();
     }
 
-    private static void receiveCoordinates() {
-        Scanner scanner = new Scanner(System.in);
+    private static void receiveCoordinates(boolean doubleSingleCoordinate) {
+        if (readCoordinate(doubleSingleCoordinate)) {
+            while (!plotCoordinates(firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY)) {
+                readCoordinate(true);
+            }
+        } else {
+            while (!plotCoordinates(firstCoordinateX, firstCoordinateY))
+                readCoordinate(false);
+        }
+    }
+
+    private static boolean readCoordinate(boolean doubleSingleCoordinate) {
+        boolean coordinateDouble;
         firstCoordinate = scanner.next();
-        secondCoordinate = scanner.next();
-        breakCoordinates(firstCoordinate, secondCoordinate);
-        validateLengthOfCoordinates();
-        while (!plotCoordinates(firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY)) {
-            scanner = new Scanner(System.in);
-            firstCoordinate = scanner.next();
+        if (doubleSingleCoordinate) {
             secondCoordinate = scanner.next();
             breakCoordinates(firstCoordinate, secondCoordinate);
+            coordinateDouble = true;
             validateLengthOfCoordinates();
+        } else {
+            breakCoordinates(firstCoordinate);
+            coordinateDouble = false;
         }
-
+        return coordinateDouble;
     }
 
     /**
@@ -127,13 +148,18 @@ public class Main {
         }
     }
 
+    private static void breakCoordinates(String firstCoordinate) {
+        firstCoordinateX = firstCoordinate.charAt(0) - INITIATE_CHARACTER;
+        firstCoordinateY = Integer.parseInt(firstCoordinate.substring(1));
+    }
+
     private static void validateLengthOfCoordinates() {
         boolean lengthStatus = false;
         if (airCraftCarrier) {
             lengthStatus = checkLength(AIRCRAFT_CARRIER_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             while (!lengthStatus) {
                 System.out.println("Error! Wrong length of the Aircraft Carrier! Try again:");
-                receiveCoordinates();
+                receiveCoordinates(true);
                 lengthStatus = checkLength(AIRCRAFT_CARRIER_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             }
             airCraftCarrier = false;
@@ -141,7 +167,7 @@ public class Main {
             lengthStatus = checkLength(BATTLESHIP_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             while (!lengthStatus) {
                 System.out.println("Error! Wrong length of the Battleship! Try again:");
-                receiveCoordinates();
+                receiveCoordinates(true);
                 lengthStatus = checkLength(BATTLESHIP_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             }
             battleShip = false;
@@ -149,7 +175,7 @@ public class Main {
             lengthStatus = checkLength(SUBMARINE_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             while (!lengthStatus) {
                 System.out.println("Error! Wrong length of the Submarine! Try again:");
-                receiveCoordinates();
+                receiveCoordinates(true);
                 lengthStatus = checkLength(SUBMARINE_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             }
             submarine = false;
@@ -157,7 +183,7 @@ public class Main {
             lengthStatus = checkLength(CRUISER_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             while (!lengthStatus) {
                 System.out.println("Error! Wrong length of the Cruiser! Try again:");
-                receiveCoordinates();
+                receiveCoordinates(true);
                 lengthStatus = checkLength(CRUISER_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             }
             cruiser = false;
@@ -165,7 +191,7 @@ public class Main {
             lengthStatus = checkLength(DESTROYER_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             while (!lengthStatus) {
                 System.out.println("Error! Wrong length of the Destroyer! Try again:");
-                receiveCoordinates();
+                receiveCoordinates(true);
                 lengthStatus = checkLength(DESTROYER_SIZE, firstCoordinateX, firstCoordinateY, secondCoordinateX, secondCoordinateY);
             }
             destroyer = false;
@@ -173,9 +199,9 @@ public class Main {
     }
 
     private static boolean checkLength(int size, int firstCoordinateX, int firstCoordinateY, int secondCoordinateX, int secondCoordinateY) {
-        if (firstCoordinateX == secondCoordinateX && size != abs(firstCoordinateY - secondCoordinateY) + 1) {
+        if (firstCoordinateX == secondCoordinateX && size != (abs(firstCoordinateY - secondCoordinateY) + 1)) {
             return false;
-        } else if (firstCoordinateY == secondCoordinateY && size != abs(firstCoordinateX - secondCoordinateX) + 1) {
+        } else if (firstCoordinateY == secondCoordinateY && size != (abs(firstCoordinateX - secondCoordinateX) + 1)) {
             return false;
         } else if (firstCoordinateY != secondCoordinateY && firstCoordinateX != secondCoordinateX) {
             return false;
@@ -191,6 +217,11 @@ public class Main {
             fixPointStatus = fixPoint(firstCoordinateX, secondCoordinateX, firstCoordinateY, 'Y');
         }
         return fixPointStatus;
+    }
+
+    private static boolean plotCoordinates(int firstCoordinateX, int firstCoordinateY) {
+        boolean fixPointStatus = false;
+        return fixPointStatus = fixPoint(firstCoordinateX, firstCoordinateY);
     }
 
     private static boolean fixPoint(int firstCoordinate, int secondCoordinate, int fixedAxisValue, char fixedAxis) {
@@ -214,7 +245,7 @@ public class Main {
             if (fixedAxis == 'Y') {
                 if (Objects.equals(battleField[startIndex - 1][fixedAxisValue], "O ") || Objects.equals(battleField[endIndex + 1][fixedAxisValue], "O ")) {
                     System.out.println("Error! You placed it too close to another one. Try again:");
-                    return  false;
+                    return false;
                 }
             }
         }
@@ -230,5 +261,21 @@ public class Main {
             }
         }
         return true;
+    }
+
+    private static boolean fixPoint(int xCoordinate, int yCoordinate) {
+        if (xCoordinate < 1 || xCoordinate > 10 || yCoordinate < 1 || yCoordinate > 10) {
+            System.out.println("Error! You entered the wrong coordinates! Try again:");
+            return false;
+        }
+        if (Objects.equals(battleField[xCoordinate][yCoordinate], "O ") ) {
+            battleField[xCoordinate][yCoordinate] = "X ";
+            System.out.println("You hit a ship!:");
+            return true;
+        } else {
+            battleField[xCoordinate][yCoordinate] = "M ";
+            System.out.println("You missed!");
+            return true;
+        }
     }
 }
